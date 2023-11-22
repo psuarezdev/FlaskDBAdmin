@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <title>Inicio</title>
+</head>
+<body>
+  <main>
+    <aside class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark rounded" style="width: 280px; height: 98vh;">
+      <p class="d-flex align-items-center mx-auto mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <span class="fs-4">Tablas</span>
+      </p>
+      <hr>
+      <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+          <button type="button" class="nav-link text-white text-decoration-underline" data-bs-toggle="modal" data-bs-target="#addTableModal">
+            SQL Editor
+          </button>
+        </li>
+        {% for table in data.tables %}
+          {% if table[0] == data.selected_table %}
+            <li class="nav-item">
+              <a href="/?table={{ table[0] }}" class="nav-link active" aria-current="page">
+                {{ table[0] }}
+              </a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a href="/?table={{ table[0] }}" class="nav-link" aria-current="page">
+                {{ table[0] }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+      <footer>
+        <a class="text-white text-decoration-underline" href="/logout">
+          Cerrar sesión
+        </a>
+      </footer>
+      <div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 90vw;">
+          <div class="modal-content m-auto">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5 text-dark" id="addTableModalLabel">SQL Editor</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-dark">
+              <textarea id="code-editor"></textarea>
+              <table id="resultsTable" class="table table-striped text-center">
+                <thead><tr></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-danger" id="resetSQL">Borrar</button>
+              <button type="button" class="btn btn-primary" id="execQuery">Ejecutar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    {% if data.fields %}
+      <section class="w-100 px-3 custom-scrollbar" style="height: 98vh;">
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addRegisterModal">
+          Añadir registro
+        </button>
+        <table id="registersTable" class="table table-striped text-center">
+          <thead>
+            <tr>
+              {% for field in data.fields %}
+                <th>{{ field[0] }}</th>
+              {% endfor %}
+              <th colspan="2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data.rows %}
+              <tr id="{{ data.selected_table }}_{{ row[0] }}">
+                {% for value in row %}
+                  <td>
+                    <input class="form-control" type="text" name="{{ data.fields[loop.index0][0] }}" value="{{ value }}" disabled />
+                  </td>
+                {% endfor %}
+                <td id="edit_{{ data.selected_table }}_{{ row[0] }}">
+                  <button type="button" class="btn btn-primary">Editar</button>
+                </td>
+                <td id="delete_{{ data.selected_table }}_{{ row[0] }}"> 
+                  <button type="button" class="btn btn-danger">
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <form class="modal fade" id="addRegisterModal" tabindex="-1" aria-labelledby="addRegisterModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addRegisterModalLabel">Añadir registros</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <input type="hidden" name="table" value="{{ data.selected_table }}" readonly />
+                {% for field in data.fields %}
+                  {% if field[0] != "id" %}
+                    <div class="mb-3">
+                      <label for="{{ field[0] }}" class="form-label">{{ field[0] | capitalize }}:</label>
+                      <input type="text" class="form-control" name="{{ field[0] }}" required />
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+    {% endif %}
+  </main>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
